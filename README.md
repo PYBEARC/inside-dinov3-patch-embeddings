@@ -2,7 +2,9 @@
 
 **English** | [繁體中文](README.zh-TW.md)
 
-A small, reproducible study of what a pretrained ViT patch projection retains and discards. A pretrained ViT patch projection can discard measurable pixel information while producing unchanged patch embeddings in exact arithmetic. Frequency-domain analysis characterizes the discarded reconstruction residual, connecting linear algebra, image reconstruction, and patch embedding behavior.
+> **Pixel information can be lost while patch embeddings stay the same.**
+
+For the tested DINOv3 patch projection, pseudoinverse reconstruction changes pixels while preserving patch embeddings in exact arithmetic. The discarded component lies in the projection's nullspace; its frequency spectrum shows where the reconstruction error is distributed. These experiments connect linear algebra, image reconstruction, and patch embedding behavior.
 
 The numerical results below show approximate embedding invariance at float32 precision. These experiments do **not** establish that DINOv3 learns safety-relevant features.
 
@@ -31,7 +33,19 @@ A normalized RGB patch is a vector $`x\in\mathbb{R}^{768}`$. Its embedding is $`
 
 $`W^{+}W`$ is the orthogonal projector onto the row space of $`W`$. Therefore $`Wr=0`$ and $`W\hat{x}+b=Wx+b`$ in exact arithmetic, even when $`r\ne0`$. This is the minimum-norm reconstruction in **normalized patch coordinates**, not an optimal natural-image reconstruction. The measured rank is 384, leaving a 384-dimensional nullspace per patch. Downstream deterministic encoder outputs are also unchanged when their input embeddings are identical; float32 computation introduces small differences.
 
-For frequency analysis, convert the original and raw reconstructed RGB arrays to grayscale using $`g=0.2989R+0.5870G+0.1140B`$, and let $`e=g-\hat{g}`$. With the orthonormal FFT $`E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))`$,
+For frequency analysis, convert the original and raw reconstructed RGB arrays to grayscale using $`g=0.2989R+0.5870G+0.1140B`$, and let $`e=g-\hat{g}`$. Define the centered orthonormal Fourier transform as follows:
+
+```math
+E = \mathcal{S}\bigl(\mathcal{F}_{\mathrm{ortho}}(e)\bigr).
+```
+
+Here, $`\mathcal{F}_{\mathrm{ortho}}`$ is the orthonormal 2D DFT and $`\mathcal{S}`$ shifts the zero-frequency component to the center. The corresponding NumPy expression is:
+
+```python
+E = np.fft.fftshift(np.fft.fft2(e, norm="ortho"))
+```
+
+By Parseval's identity,
 
 ```math
 \mathrm{MSE}_{g}=\frac{1}{HW}\sum_{u,v}|E_{u,v}|^2

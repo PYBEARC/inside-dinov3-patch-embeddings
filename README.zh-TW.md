@@ -2,7 +2,9 @@
 
 [English](README.md) | **繁體中文**
 
-這個小型實驗研究預訓練 ViT 的 patch projection 保留與捨棄了哪些像素資訊。主要結論是：**預訓練的線性 patch projection 可以捨棄可量測的像素資訊，同時在精確算術下產生完全相同的 patch embedding。** 分析重建殘差的頻譜，可以將線性代數、影像重建與 patch embedding 的行為連結起來。
+> **像素資訊可以流失，patch embedding 仍可不變。**
+
+對本實驗的 DINOv3 patch projection 而言，偽逆重建會改變像素，卻在精確算術下保留相同的 patch embedding。被捨棄的分量位於投影的零空間；分析它的頻譜，可以看出重建誤差如何分布於不同頻率，將線性代數、影像重建與 patch embedding 的行為連結起來。
 
 以下實測結果顯示 float32 精度下的近似不變性。這些實驗**不能證明 DINOv3 學到了與安全相關的特徵**。
 
@@ -35,7 +37,19 @@ $`W^{+}W`$ 是投影到 $`W`$ 列空間（row space）的正交投影矩陣，�
 
 實測矩陣的秩為 384，因此每個 patch 的零空間（nullspace）維度為 384。若輸入 embedding 完全一致，後續確定性的 encoder 輸出也會一致；float32 計算則會產生微小差異。
 
-頻域分析先將原圖與未裁切重建圖轉為灰階：$`g=0.2989R+0.5870G+0.1140B`$，並令 $`e=g-\hat{g}`$。使用正交歸一化 FFT：$`E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))`$，則有
+頻域分析先將原圖與未裁切重建圖轉為灰階：$`g=0.2989R+0.5870G+0.1140B`$，並令 $`e=g-\hat{g}`$。將置中的正交歸一化傅立葉轉換定義為：
+
+```math
+E = \mathcal{S}\bigl(\mathcal{F}_{\mathrm{ortho}}(e)\bigr).
+```
+
+其中 $`\mathcal{F}_{\mathrm{ortho}}`$ 是正交歸一化的二維離散傅立葉轉換，$`\mathcal{S}`$ 將零頻率分量移到中心。對應的 NumPy 寫法為：
+
+```python
+E = np.fft.fftshift(np.fft.fft2(e, norm="ortho"))
+```
+
+依 Parseval 恆等式，有
 
 ```math
 \mathrm{MSE}_{g}=\frac{1}{HW}\sum_{u,v}|E_{u,v}|^2
