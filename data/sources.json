@@ -1,0 +1,30 @@
+[
+  {
+    "file": "sample.jpg",
+    "creator": "NASA",
+    "source": "https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.astronaut",
+    "license": "Public domain (as documented by scikit-image)",
+    "preparation": "skimage.data.astronaut() saved as JPEG with PIL; existing bytes retained",
+    "sha256": "613a5db3dbcdac4f00eddf344169108e2ac1979d6230777c68806a38f84ab5dc"
+  },
+  {
+    "file": "coffee.jpg",
+    "creator": "Rachel Michetti",
+    "source": "https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.coffee",
+    "license": "CC0-1.0",
+    "preparation": "skimage.data.coffee() saved as JPEG with PIL; existing bytes retained",
+    "sha256": "a7764c745ea9ad02edc14754a1538f8baa30056e802e7112c284acae8484a35b"
+  },
+  {
+    "file": "street.jpg",
+    "creator": "Ali Sabbagh",
+    "title": "Paris Street scene (42791982090).jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Paris_Street_scene_(42791982090).jpg",
+    "original_source": "https://www.flickr.com/photos/32174721@N04/42791982090",
+    "download": "https://upload.wikimedia.org/wikipedia/commons/8/85/Paris_Street_scene_(42791982090).jpg",
+    "license": "CC0-1.0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "preparation": "Original JPEG bytes retained without re-encoding or cropping",
+    "sha256": "7dce1f8945f11c8b24921345c9a4bf5d67966cf119be03a2a5559e86ce02af35"
+  }
+]

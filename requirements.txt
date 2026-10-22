@@ -1,0 +1,9 @@
+# Versions used for the committed CPU reproduction (Python 3.10.20).
+# The recorded run used the CUDA 11.8 build of torch 2.6.0 on CPU.
+torch==2.6.0
+transformers==5.20.1
+huggingface_hub==1.32.0
+safetensors==0.8.0
+Pillow==12.2.0
+numpy==1.26.4
+matplotlib==3.10.9

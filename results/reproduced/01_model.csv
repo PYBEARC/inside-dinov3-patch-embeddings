@@ -1,0 +1,2 @@
+model_type,hidden_size,patch_size,projection_rows,projection_columns,rank,nullity,output_shape
+dinov3_vit,384,16,384,768,384,384,"(1, 201, 384)"
