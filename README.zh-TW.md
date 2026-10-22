@@ -25,24 +25,24 @@
 
 ## 數學說明
 
-一個正規化 RGB patch 可表示為 $x\in\mathbb{R}^{768}$，其 embedding 為 $z=Wx+b$，其中 $W\in\mathbb{R}^{384\times768}$。以偽逆重建：
+一個正規化 RGB patch 可表示為 $`x\in\mathbb{R}^{768}`$，其 embedding 為 $`z=Wx+b`$，其中 $`W\in\mathbb{R}^{384\times768}`$。以偽逆重建：
 
-$$
-\hat{x}=W^+(z-b)=W^+Wx,\qquad r=x-\hat{x}=(I-W^+W)x.
-$$
+```math
+\hat{x}=W^{+}(z-b)=W^{+}Wx,\qquad r=x-\hat{x}=(I-W^{+}W)x.
+```
 
-$W^+W$ 是投影到 $W$ 列空間（row space）的正交投影矩陣，因此 $Wr=0$。即使 $r\ne0$，在精確算術下仍有 $W\hat{x}+b=Wx+b$。此重建是在**正規化 patch 座標**下的最小範數解，並非最佳自然影像重建。
+$`W^{+}W`$ 是投影到 $`W`$ 列空間（row space）的正交投影矩陣，因此 $`Wr=0`$。即使 $`r\ne0`$，在精確算術下仍有 $`W\hat{x}+b=Wx+b`$。此重建是在**正規化 patch 座標**下的最小範數解，並非最佳自然影像重建。
 
 實測矩陣的秩為 384，因此每個 patch 的零空間（nullspace）維度為 384。若輸入 embedding 完全一致，後續確定性的 encoder 輸出也會一致；float32 計算則會產生微小差異。
 
-頻域分析先將原圖與未裁切重建圖轉為灰階：$g=0.2989R+0.5870G+0.1140B$，並令 $e=g-\hat{g}$。使用正交歸一化 FFT：$E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))$，則有
+頻域分析先將原圖與未裁切重建圖轉為灰階：$`g=0.2989R+0.5870G+0.1140B`$，並令 $`e=g-\hat{g}`$。使用正交歸一化 FFT：$`E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))`$，則有
 
-$$
+```math
 \mathrm{MSE}_{g}=\frac{1}{HW}\sum_{u,v}|E_{u,v}|^2
 =\sum_{B\in\{\mathrm{low,mid,high}\}}\frac{1}{HW}\sum_{(u,v)\in B}|E_{u,v}|^2.
-$$
+```
 
-頻帶沿用原始定義：以平移後 FFT 中心為原點，計算歐氏半徑，再除以最大**角落**半徑。低頻為 $\rho\le0.15$，中頻為 $0.15<\rho\le0.45$，高頻為 $\rho>0.45$。
+頻帶沿用原始定義：以平移後 FFT 中心為原點，計算歐氏半徑，再除以最大**角落**半徑。低頻為 $`\rho\le0.15`$，中頻為 $`0.15\lt\rho\le0.45`$，高頻為 $`\rho\gt0.45`$。
 
 相對頻帶誤差為該頻帶的殘差能量除以原圖灰階能量，分母加上 `1e-12`，所以可能大於 1。三個頻帶的 MSE 貢獻加總等於**灰階 MSE，而非 RGB MSE**。頻譜顯示使用未歸一化 FFT 的 `log1p(abs(FFT))`；徑向曲線依半徑向下取整後分組平均。不額外加窗或扣除平均值；頻帶能量包含 DC，徑向圖則不顯示 DC。
 
@@ -64,20 +64,26 @@ $$
 
 ### 關鍵圖表
 
-Coffee 圖片的重建比較與未裁切誤差圖：
+街景輸入圖片（此處保留原始長寬比，實驗時縮放至 224 × 224）：
 
-![預訓練投影與隨機投影的重建比較](results/reproduced/figures/coffee/reconstruction.png)
+<img src="data/street.jpg" alt="Ali Sabbagh 拍攝的巴黎街景" width="720">
+
+攝影：Ali Sabbagh，CC0 1.0；[來源與授權紀錄](data/README.md)。
+
+街景的重建比較與未裁切誤差圖：
+
+![街景：預訓練投影與隨機投影的重建比較](results/reproduced/figures/street/reconstruction.png)
 
 灰階影像頻譜與重建殘差頻譜：
 
-![影像頻譜](results/reproduced/figures/coffee/frequency_spectra.png)
-![重建殘差頻譜](results/reproduced/figures/coffee/error_spectra.png)
+![影像頻譜](results/reproduced/figures/street/frequency_spectra.png)
+![重建殘差頻譜](results/reproduced/figures/street/error_spectra.png)
 
 徑向殘差功率：
 
-![徑向重建誤差功率](results/reproduced/figures/coffee/radial_error_power.png)
+![徑向重建誤差功率](results/reproduced/figures/street/radial_error_power.png)
 
-另有[像素誤差圖](results/reproduced/figures/coffee/pixel_error_maps.png)、[徑向頻譜幅值](results/reproduced/figures/coffee/radial_frequency_profile_log.png)與[零空間重建比較](results/reproduced/figures/street/nullspace.png)。各圖片的輸出分別放在[圖表目錄](results/reproduced/figures)。原始圖表保存在本機，公開版的排除原因見[歷史封存說明](results/legacy/README.md)；不臆造缺失的歷史數值紀錄。
+另有[像素誤差圖](results/reproduced/figures/street/pixel_error_maps.png)、[徑向頻譜幅值](results/reproduced/figures/street/radial_frequency_profile_log.png)與[零空間重建比較](results/reproduced/figures/street/nullspace.png)。另可查看 [sample 重建比較](results/reproduced/figures/sample/reconstruction.png)與 [coffee 重建比較](results/reproduced/figures/coffee/reconstruction.png)。各圖片的輸出分別放在[圖表目錄](results/reproduced/figures)。原始圖表保存在本機，公開版的排除原因見[歷史封存說明](results/legacy/README.md)；不臆造缺失的歷史數值紀錄。
 
 ## 重現與更換圖片
 

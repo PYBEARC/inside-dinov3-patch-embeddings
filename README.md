@@ -23,22 +23,22 @@ All MSE, error maps, reconstruction differences, FFTs, and token comparisons use
 
 ## Mathematics
 
-A normalized RGB patch is a vector $x\in\mathbb{R}^{768}$. Its embedding is $z=Wx+b$, with $W\in\mathbb{R}^{384\times768}$. Pseudoinverse reconstruction gives
+A normalized RGB patch is a vector $`x\in\mathbb{R}^{768}`$. Its embedding is $`z=Wx+b`$, with $`W\in\mathbb{R}^{384\times768}`$. Pseudoinverse reconstruction gives
 
-$$
-\hat{x}=W^+(z-b)=W^+Wx,\qquad r=x-\hat{x}=(I-W^+W)x.
-$$
+```math
+\hat{x}=W^{+}(z-b)=W^{+}Wx,\qquad r=x-\hat{x}=(I-W^{+}W)x.
+```
 
-$W^+W$ is the orthogonal projector onto the row space of $W$. Therefore $Wr=0$ and $W\hat{x}+b=Wx+b$ in exact arithmetic, even when $r\ne0$. This is the minimum-norm reconstruction in **normalized patch coordinates**, not an optimal natural-image reconstruction. The measured rank is 384, leaving a 384-dimensional nullspace per patch. Downstream deterministic encoder outputs are also unchanged when their input embeddings are identical; float32 computation introduces small differences.
+$`W^{+}W`$ is the orthogonal projector onto the row space of $`W`$. Therefore $`Wr=0`$ and $`W\hat{x}+b=Wx+b`$ in exact arithmetic, even when $`r\ne0`$. This is the minimum-norm reconstruction in **normalized patch coordinates**, not an optimal natural-image reconstruction. The measured rank is 384, leaving a 384-dimensional nullspace per patch. Downstream deterministic encoder outputs are also unchanged when their input embeddings are identical; float32 computation introduces small differences.
 
-For frequency analysis, convert the original and raw reconstructed RGB arrays to grayscale using $g=0.2989R+0.5870G+0.1140B$, and let $e=g-\hat{g}$. With the orthonormal FFT $E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))$,
+For frequency analysis, convert the original and raw reconstructed RGB arrays to grayscale using $`g=0.2989R+0.5870G+0.1140B`$, and let $`e=g-\hat{g}`$. With the orthonormal FFT $`E=\operatorname{fftshift}(\operatorname{fft2}(e,\mathrm{norm}=\text{ortho}))`$,
 
-$$
+```math
 \mathrm{MSE}_{g}=\frac{1}{HW}\sum_{u,v}|E_{u,v}|^2
 =\sum_{B\in\{\mathrm{low,mid,high}\}}\frac{1}{HW}\sum_{(u,v)\in B}|E_{u,v}|^2.
-$$
+```
 
-Bands use Euclidean radius from the shifted FFT center, normalized by the maximum **corner** radius: low $\rho\le0.15$, mid $0.15<\rho\le0.45$, high $\rho>0.45$. Relative band error is residual energy divided by original grayscale energy in that band, with `1e-12` added to the denominator; it can exceed 1. These grayscale contributions sum to grayscale MSE, **not RGB MSE**. Magnitude plots use the original unnormalized FFT and `log1p(abs(FFT))`; radial curves average values in integer-floor radius bins. No windowing or mean subtraction is introduced; band energies include DC, while radial plots hide it.
+Bands use Euclidean radius from the shifted FFT center, normalized by the maximum **corner** radius: low $`\rho\le0.15`$, mid $`0.15\lt\rho\le0.45`$, high $`\rho\gt0.45`$. Relative band error is residual energy divided by original grayscale energy in that band, with `1e-12` added to the denominator; it can exceed 1. These grayscale contributions sum to grayscale MSE, **not RGB MSE**. Magnitude plots use the original unnormalized FFT and `log1p(abs(FFT))`; radial curves average values in integer-floor radius bins. No windowing or mean subtraction is introduced; band energies include DC, while radial plots hide it.
 
 ## Verified results
 
@@ -56,20 +56,26 @@ Full precision tables: [reconstruction](results/reproduced/02_reconstruction.csv
 
 ### Key figures
 
-Coffee comparison and unclipped reconstruction error maps:
+Street-scene input (original aspect ratio; experiments resize it to 224 × 224):
 
-![Pretrained versus random reconstruction](results/reproduced/figures/coffee/reconstruction.png)
+<img src="data/street.jpg" alt="Paris street scene by Ali Sabbagh" width="720">
+
+Photo: Ali Sabbagh, CC0 1.0; [source and attribution](data/README.md).
+
+Street reconstruction comparison and unclipped reconstruction error maps:
+
+![Street: pretrained versus random reconstruction](results/reproduced/figures/street/reconstruction.png)
 
 Grayscale image spectra and residual spectra:
 
-![Frequency spectra](results/reproduced/figures/coffee/frequency_spectra.png)
-![Residual spectra](results/reproduced/figures/coffee/error_spectra.png)
+![Frequency spectra](results/reproduced/figures/street/frequency_spectra.png)
+![Residual spectra](results/reproduced/figures/street/error_spectra.png)
 
 Radial residual power:
 
-![Radial reconstruction error power](results/reproduced/figures/coffee/radial_error_power.png)
+![Radial reconstruction error power](results/reproduced/figures/street/radial_error_power.png)
 
-Also available: [pixel error maps](results/reproduced/figures/coffee/pixel_error_maps.png), [radial magnitude](results/reproduced/figures/coffee/radial_frequency_profile_log.png), and [nullspace comparison](results/reproduced/figures/street/nullspace.png). Each input has its own [figure directory](results/reproduced/figures). The [historical archive note](results/legacy/README.md) explains why original figures are preserved locally and excluded from this public repository.
+Also available: [pixel error maps](results/reproduced/figures/street/pixel_error_maps.png), [radial magnitude](results/reproduced/figures/street/radial_frequency_profile_log.png), and [nullspace comparison](results/reproduced/figures/street/nullspace.png). The [sample comparison](results/reproduced/figures/sample/reconstruction.png) and [coffee comparison](results/reproduced/figures/coffee/reconstruction.png) are also available. Each input has its own [figure directory](results/reproduced/figures). The [historical archive note](results/legacy/README.md) explains why original figures are preserved locally and excluded from this public repository.
 
 ## Reproduction and changing images
 
